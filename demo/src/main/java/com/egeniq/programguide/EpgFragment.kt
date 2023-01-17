@@ -255,4 +255,8 @@ class EpgFragment : ProgramGuideFragment<EpgFragment.SimpleProgram>() {
         requestingProgramGuideFor(currentDate)
     }
 
+    override fun onScroll() {
+        TODO("Not yet implemented")
+    }
+
 }

@@ -55,6 +55,7 @@ class ProgramGuideGridView<T>(context: Context, attrs: AttributeSet?, defStyle: 
     interface ScheduleSelectionListener<T> {
         // Can be null if nothing is selected
         fun onSelectionChanged(schedule: ProgramGuideSchedule<T>?)
+        fun onScroll(schedule: Int)
     }
 
     private lateinit var programGuideManager: ProgramGuideManager<*>
@@ -94,8 +95,14 @@ class ProgramGuideGridView<T>(context: Context, attrs: AttributeSet?, defStyle: 
             // Do nothing
         }
 
+        override fun onScroll() {
+            TODO("Not yet implemented")
+        }
+
         override fun onTimeRangeUpdated() {
-            // When time range is changed, we clear the focus state.
+
+            Log.e("QMRUPDATE","onSchedulesUpdated")
+// When time range is changed, we clear the focus state.
             clearUpDownFocusState(null)
         }
     }
@@ -103,6 +110,7 @@ class ProgramGuideGridView<T>(context: Context, attrs: AttributeSet?, defStyle: 
     @Suppress("UNCHECKED_CAST")
     private val globalFocusChangeListener =
         ViewTreeObserver.OnGlobalFocusChangeListener { _, newFocus ->
+
             if (newFocus !== nextFocusByUpDown) {
                 // If focus is changed by other buttons than UP/DOWN buttons,
                 // we clear the focus state.
@@ -113,6 +121,7 @@ class ProgramGuideGridView<T>(context: Context, attrs: AttributeSet?, defStyle: 
                 lastFocusedView = newFocus
                 if (newFocus is ProgramGuideItemView<*> && (correctScheduleView == null || correctScheduleView == newFocus)) {
                     scheduleSelectionListener?.onSelectionChanged(newFocus.schedule as ProgramGuideSchedule<T>?)
+
                 }
                 correctScheduleView = null
             } else {
@@ -194,6 +203,7 @@ class ProgramGuideGridView<T>(context: Context, attrs: AttributeSet?, defStyle: 
     }
 
     private fun clearUpDownFocusState(focus: View?) {
+
         lastUpDownDirection = 0
         if (layoutDirection == LAYOUT_DIRECTION_LTR) {
             focusRangeLeft = overlapStart
@@ -217,6 +227,7 @@ class ProgramGuideGridView<T>(context: Context, attrs: AttributeSet?, defStyle: 
     }
 
     private fun getRightMostFocusablePosition(): Int {
+
         return if (!getGlobalVisibleRect(tempRect)) {
             Integer.MAX_VALUE
         } else tempRect.right - ProgramGuideUtil.convertMillisToPixel(FOCUS_AREA_SIDE_MARGIN_MILLIS)
@@ -229,6 +240,7 @@ class ProgramGuideGridView<T>(context: Context, attrs: AttributeSet?, defStyle: 
     }
 
     private fun focusFind(focused: View, direction: Int): View? {
+
         val focusedChildIndex = getFocusedChildIndex()
         if (focusedChildIndex == INVALID_INDEX) {
             Log.w(TAG, "No child view has focus")
@@ -322,6 +334,7 @@ class ProgramGuideGridView<T>(context: Context, attrs: AttributeSet?, defStyle: 
     }
 
     override fun onScrollChanged(l: Int, t: Int, oldl: Int, oldt: Int) {
+
         // It is required to properly handle OnRepeatedKeyInterceptListener. If the focused
         // item's are at the almost end of screen, focus change to the next item doesn't work.
         // It restricts that a focus item's position cannot be too far from the desired position.
@@ -332,7 +345,6 @@ class ProgramGuideGridView<T>(context: Context, attrs: AttributeSet?, defStyle: 
             val focusedLocation = IntArray(2)
             focusedView.getLocationOnScreen(focusedLocation)
             val y = focusedLocation[1] - location[1]
-
             val minY = (selectionRow - 1) * rowHeight
             if (y < minY) {
                 scrollBy(0, y - minY)

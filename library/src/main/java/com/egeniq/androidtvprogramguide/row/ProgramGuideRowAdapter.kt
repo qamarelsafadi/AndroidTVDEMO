@@ -39,7 +39,8 @@ import java.util.*
  */
 internal class ProgramGuideRowAdapter(
     private val context: Context,
-    private val programGuideHolder: ProgramGuideHolder<*>
+    private val programGuideHolder: ProgramGuideHolder<*>,
+    var onScoll: ((Int) -> Unit)? = null
 ) :
     RecyclerView.Adapter<ProgramGuideRowAdapter.ProgramRowViewHolder>(),
     ProgramGuideManager.Listener {
@@ -100,6 +101,9 @@ internal class ProgramGuideRowAdapter(
         val itemView = LayoutInflater.from(parent.context).inflate(viewType, parent, false)
         val gridView = itemView.findViewById<ProgramGuideRowGridView>(R.id.row)
         gridView.setRecycledViewPool(recycledViewPool)
+        gridView.onScoll = {
+            onScoll?.let { it1 -> it1(it) }
+        }
         return ProgramRowViewHolder(itemView)
     }
 
@@ -111,10 +115,16 @@ internal class ProgramGuideRowAdapter(
         // Do nothing
     }
 
+    override fun onScroll() {
+        TODO("Not yet implemented")
+    }
+
+
     internal class ProgramRowViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
 
         private val container: ViewGroup = itemView as ViewGroup
         private val rowGridView: ProgramGuideRowGridView = container.findViewById(R.id.row)
+
 
         private val channelNameView: TextView = container.findViewById(R.id.programguide_channel_name)
         private val channelLogoView: ImageView = container.findViewById(R.id.programguide_channel_logo)

@@ -39,6 +39,7 @@ import androidx.leanback.widget.setFocusOutAllowed
 import androidx.leanback.widget.setFocusOutSideAllowed
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.RecyclerView.OnScrollListener
 import com.egeniq.androidtvprogramguide.entity.ProgramGuideChannel
 import com.egeniq.androidtvprogramguide.entity.ProgramGuideSchedule
 import com.egeniq.androidtvprogramguide.item.ProgramGuideItemView
@@ -392,10 +393,14 @@ abstract class ProgramGuideFragment<T> : Fragment(), ProgramGuideManager.Listene
             it.itemAlignmentOffset = 0
             it.itemAlignmentOffsetPercent = BaseGridView.ITEM_ALIGN_OFFSET_PERCENT_DISABLED
 
-            val adapter = ProgramGuideRowAdapter(it.context, this)
+            val adapter = ProgramGuideRowAdapter(it.context, this){
+                onHorizontalScrolled(it)
+
+            }
             it.adapter = adapter
         }
         programGuideManager.listeners.add(this)
+
         currentDateView?.alpha = 0f
         timeRow.let { timelineRow ->
             val timelineAdapter = ProgramGuideTimeListAdapter(resources, DISPLAY_TIMEZONE)
@@ -476,7 +481,6 @@ abstract class ProgramGuideFragment<T> : Fragment(), ProgramGuideManager.Listene
         }
         updateCurrentTimeIndicator()
         var i = 0
-
         programGuideGrid.let { grid ->
             val n = grid.childCount
             while (i < n) {
@@ -920,5 +924,10 @@ abstract class ProgramGuideFragment<T> : Fragment(), ProgramGuideManager.Listene
         } else {
             Log.w(TAG, "Program not updated, no match found.")
         }
+    }
+
+    override fun onScroll(schedule: Int) {
+        Log.e("QMRSSS","${schedule}")
+        onHorizontalScrolled(52)
     }
 }

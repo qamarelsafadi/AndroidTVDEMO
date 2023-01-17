@@ -59,6 +59,10 @@ class ProgramGuideListAdapter<T>(
         }
     }
 
+    override fun onScroll() {
+        TODO("Not yet implemented")
+    }
+
     fun updateProgram(program: ProgramGuideSchedule<*>): Boolean {
         for (position in 0 until itemCount) {
             if (programGuideManager.getScheduleForChannelIdAndIndex(

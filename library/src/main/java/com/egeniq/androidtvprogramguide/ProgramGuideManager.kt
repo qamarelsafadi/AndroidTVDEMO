@@ -348,6 +348,7 @@ class ProgramGuideManager<T> {
 
     private fun notifySchedulesUpdated() {
         for (listener in listeners) {
+
             listener.onSchedulesUpdated()
         }
     }
@@ -453,5 +454,7 @@ class ProgramGuideManager<T> {
     interface Listener {
         fun onTimeRangeUpdated()
         fun onSchedulesUpdated()
+
+        fun onScroll()
     }
 }

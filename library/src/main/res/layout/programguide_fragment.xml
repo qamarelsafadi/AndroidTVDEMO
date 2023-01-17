@@ -162,6 +162,7 @@
             android:layout_gravity="center"
             android:text="@string/programguide_error_fetching_content" />
 
+
         <!-- Data state -->
         <com.egeniq.androidtvprogramguide.ProgramGuideGridView
             android:id="@+id/programguide_grid"

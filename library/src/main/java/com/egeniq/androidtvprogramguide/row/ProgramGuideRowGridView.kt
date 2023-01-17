@@ -19,9 +19,11 @@ package com.egeniq.androidtvprogramguide.row
 import android.content.Context
 import android.graphics.Rect
 import android.util.AttributeSet
+import android.util.Log
 import android.view.View
 import android.view.ViewTreeObserver.OnGlobalLayoutListener
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.egeniq.androidtvprogramguide.ProgramGuideGridView
 import com.egeniq.androidtvprogramguide.ProgramGuideHolder
 import com.egeniq.androidtvprogramguide.ProgramGuideManager
 import com.egeniq.androidtvprogramguide.R
@@ -29,6 +31,8 @@ import com.egeniq.androidtvprogramguide.entity.ProgramGuideChannel
 import com.egeniq.androidtvprogramguide.timeline.ProgramGuideTimelineGridView
 import com.egeniq.androidtvprogramguide.util.ProgramGuideUtil
 import com.egeniq.androidtvprogramguide.item.ProgramGuideItemView
+import com.egeniq.androidtvprogramguide.utils.withDelay
+import kotlinx.coroutines.delay
 import java.util.concurrent.TimeUnit
 import kotlin.math.max
 import kotlin.math.min
@@ -36,8 +40,10 @@ import kotlin.math.min
 class ProgramGuideRowGridView @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
-    defStyle: Int = 0
+    defStyle: Int = 0,
+    var onScoll: ((Int) -> Unit)? = null
 ) : ProgramGuideTimelineGridView(context, attrs, defStyle) {
+
 
     companion object {
         private val ONE_HOUR_MILLIS = TimeUnit.HOURS.toMillis(1)
@@ -68,12 +74,34 @@ class ProgramGuideRowGridView @JvmOverloads constructor(
         }
     }
 
+    var dx = 0
     override fun onScrolled(dx: Int, dy: Int) {
         // Remove callback to prevent updateChildVisibleArea being called twice.
         viewTreeObserver.removeOnGlobalLayoutListener(layoutListener)
-        super.onScrolled(dx, dy)
-        updateChildVisibleArea()
+        updateChildVisibleArea(dx)
+        if (dx > 0) {
+            this.dx =dx
+            {
+                onScoll?.let { it(dx) }
+            }.withDelay(1000)
+            System.out.println("Scrolled Right");
+        } else if (dx < 0) {
+            this.dx =dx;
+            {
+                onScoll?.let { it(dx) }
+            }.withDelay(1000)
+            System.out.println("Scrolled Left");
+        } else {
+            this.dx = 0
+            System.out.println("No Horizontal Scrolled");
+        }
     }
+
+    override fun onScrollStateChanged(state: Int) {
+        super.onScrollStateChanged( state);
+
+    }
+
 
     // Call this API after RTL is resolved. (i.e. View is measured.)
     private fun isDirectionStart(direction: Int): Boolean {
@@ -100,6 +128,8 @@ class ProgramGuideRowGridView @JvmOverloads constructor(
         if (isDirectionStart(direction) || direction == View.FOCUS_BACKWARD) {
             if (focusedEntry.startsAtMillis < fromMillis) {
                 // The current entry starts outside of the view; Align or scroll to the left.
+                Log.e("QMRSCCCCC5","hhhh")
+
                 scrollByTime(
                     max(-ONE_HOUR_MILLIS, focusedEntry.startsAtMillis - fromMillis)
                 )
@@ -109,6 +139,8 @@ class ProgramGuideRowGridView @JvmOverloads constructor(
             if (focusedEntry.endsAtMillis > toMillis) {
                 // The current entry ends outside of the view; Scroll to the right (or left, if RTL).
                 scrollByTime(ONE_HOUR_MILLIS)
+                Log.e("QMRSCCCCC3","hhhh")
+
                 return focused
             }
         }
@@ -118,6 +150,8 @@ class ProgramGuideRowGridView @JvmOverloads constructor(
             if (isDirectionEnd(direction) || direction == View.FOCUS_FORWARD) {
                 if (focusedEntry.endsAtMillis != toMillis) {
                     // The focused entry is the last entry; Align to the right edge.
+                    Log.e("QMRSCCCCC4","hhhh")
+
                     scrollByTime(focusedEntry.endsAtMillis - toMillis)
                     return focused
                 }
@@ -129,6 +163,8 @@ class ProgramGuideRowGridView @JvmOverloads constructor(
 
         if (isDirectionStart(direction) || direction == View.FOCUS_BACKWARD) {
             if (targetEntry.startsAtMillis < fromMillis && targetEntry.endsAtMillis < fromMillis + HALF_HOUR_MILLIS) {
+                Log.e("QMRSCCCCC2","hhhh")
+
                 // The target entry starts outside the view; Align or scroll to the left (or right, on RTL).
                 scrollByTime(
                     max(-ONE_HOUR_MILLIS, targetEntry.startsAtMillis - fromMillis)
@@ -136,6 +172,8 @@ class ProgramGuideRowGridView @JvmOverloads constructor(
             }
         } else if (isDirectionEnd(direction) || direction == View.FOCUS_FORWARD) {
             if (targetEntry.startsAtMillis > fromMillis + ONE_HOUR_MILLIS + HALF_HOUR_MILLIS) {
+                Log.e("QMRSCCCCC1","hhhh")
+
                 // The target entry starts outside the view; Align or scroll to the right (or left, on RTL).
                 scrollByTime(
                     min(
@@ -151,6 +189,7 @@ class ProgramGuideRowGridView @JvmOverloads constructor(
 
 
     private fun scrollByTime(timeToScroll: Long) {
+        Log.e("QMRSCCCCC","hhhh")
         programGuideManager.shiftTime(timeToScroll)
     }
 
@@ -311,11 +350,14 @@ class ProgramGuideRowGridView @JvmOverloads constructor(
         }
     }
 
-    internal fun updateChildVisibleArea() {
+    internal fun updateChildVisibleArea(dx: Int? = null) {
         for (i in 0 until childCount) {
             val child = getChildAt(i) as ProgramGuideItemView<*>
             if (left < child.right && child.left < right) {
                 child.updateVisibleArea()
+
+                Log.e("SAF","DI")
+
             }
         }
     }
